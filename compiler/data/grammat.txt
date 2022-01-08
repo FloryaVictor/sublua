@@ -1,23 +1,20 @@
 program := statement*
 
-statement := expr | ifStatement | whileStatement | returnStatement | breakStatement | declaration
+statement := ifStatement | whileStatement | returnStatement | breakStatement | declaration
 
 expr := orExpr
 orExpr := andExpr ("or" andExpr)*
 andExpr := eqExpr ("and" eqExpr)*
 eqExpr := cmpExpr (("==" | "~=") cmpExpr)*
-eqExpr := addExpr (("<" | "<=" | ">" | ">=") addExpr)*
+cmpExpr := addExpr (("<" | "<=" | ">" | ">=") addExpr)*
 addExpr := mulExpr (("+" | "-") mulExpr)*
 mulExpr := unaryExpr (("*" | "/" | "%") unaryExpr)*
-unaryExpr := baseExpr | ("-" | "not") unaryExpr
-baseExpr := [id] | value | "(" expr ")" | callExpr
+unaryExpr :=  | ("+" | "-" | "not")* valueExpr 
+valueExpr := [id] | value | "(" expr ")" | callExpr
 value := [boolean] | [number] | [string] | "nil"
-callExpr := [id] "(" (exprList? ")" 
-exprList := expr ("," expr)* 
+callExpr := [id] "(" (expr ("," expr)* )? ")" 
 
-ifStatement := "if" expr "then" program elseStatement? "end"
-
-elseStatement := "else" program
+ifStatement := "if" expr "then" program ("else" program)? "end"
 
 whileStatement := "while" expr "do" program "end"
 
@@ -27,9 +24,7 @@ breakStatement := "break"
 
 declaration := varDeclaration | functionDeclaration
 
-varDeclaration := [id] assignment?
+varDeclaration := [id] "=" expr
 
-assignment := "=" expr
+functionDeclaration := "function" [id] "(" ([id] ("," [id])*)? ")" program "end"
 
-functionDeclaration := "function" [id] "(" argsList? ")" program "end"
-argsList := [id] ("," [id])*
