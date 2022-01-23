@@ -1,5 +1,6 @@
-program := statement*
+program := statementList
 
+statementList := statement* 
 statement := ifStatement | whileStatement | returnStatement | breakStatement | declaration
 
 expr := orExpr
@@ -9,14 +10,14 @@ eqExpr := cmpExpr (("==" | "~=") cmpExpr)*
 cmpExpr := addExpr (("<" | "<=" | ">" | ">=") addExpr)*
 addExpr := mulExpr (("+" | "-") mulExpr)*
 mulExpr := unaryExpr (("*" | "/" | "%") unaryExpr)*
-unaryExpr :=  | ("+" | "-" | "not")* valueExpr 
+unaryExpr := ("+" | "-" | "not")* valueExpr 
 valueExpr := [id] | value | "(" expr ")" | callExpr
 value := [boolean] | [number] | [string] | "nil"
 callExpr := [id] "(" (expr ("," expr)* )? ")" 
 
-ifStatement := "if" expr "then" program ("else" program)? "end"
+ifStatement := "if" expr "then" statementList ("else" statementList)? "end"
 
-whileStatement := "while" expr "do" program "end"
+whileStatement := "while" expr "do" statementList "end"
 
 returnStatement := "return" expr?
 
@@ -26,5 +27,5 @@ declaration := varDeclaration | functionDeclaration
 
 varDeclaration := [id] "=" expr
 
-functionDeclaration := "function" [id] "(" ([id] ("," [id])*)? ")" program "end"
+functionDeclaration := "function" [id] "(" ([id] ("," [id])*)? ")" statementList "end"
 

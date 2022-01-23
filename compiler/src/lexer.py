@@ -44,7 +44,7 @@ class Lexer:
         self.rules = []
         for regex, tag in rules:
             self.rules.append((re.compile(regex), tag))
-        self.redundant = ['Comment']
+        self._redundant = ['Comment']
 
     def init(self, code: str):
         self._index = 0
@@ -97,9 +97,12 @@ class Lexer:
             token = self._next()
             if token is None:
                 break
-            if token.tag in self.redundant:
+            if token.tag in self._redundant:
                 continue
             yield token
+    
+    def lex(self):
+        return list(self.tokens())
 
 
 if __name__ == "__main__":

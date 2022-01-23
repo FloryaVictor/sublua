@@ -8,8 +8,12 @@ class Node:
 class Statement(Node):
     pass
 
-class Program(Node):
+class StatementList(Node):
     def __init__(self, statements: list[Statement]) -> None:
+        self.statements = statements
+
+class Program(Node):
+    def __init__(self, statements: StatementList) -> None:
         self.statements = statements
 
 # Expressions
@@ -46,32 +50,38 @@ class AndExpr(Expr):
         self.exprs = exprs
 
 class EqExpr(Expr):
-    def __init__(self, exprs: list[CmpExpr]) -> None:
+    def __init__(self, exprs: list[CmpExpr], ops: list[str]) -> None:
         self.exprs = exprs
+        self.ops = ops
 
 class CmpExpr(Expr):
-    def __init__(self, exprs: list[AddExpr]) -> None:
+    def __init__(self, exprs: list[AddExpr], ops: list[str]) -> None:
         self.exprs = exprs
+        self.ops = ops
+
 
 class AddExpr(Expr):
-    def __init__(self, exprs: list[MulExpr]) -> None:
+    def __init__(self, exprs: list[MulExpr],  ops: list[str]) -> None:
         self.exprs = exprs
+        self.ops = ops
 
 class MulExpr(Expr):
-    def __init__(self, exprs: list[UnaryExpr]) -> None:
+    def __init__(self, exprs: list[UnaryExpr],  ops: list[str]) -> None:
         self.exprs = exprs
+        self.ops = ops
 
 class UnaryExpr(Expr):
-    def __init__(self, unaryPrefix: list[str]) -> None:
-        self.unaryPrefix = unaryPrefix
+    def __init__(self, value: ValueExpr, ops: list[str]) -> None:
+        self.value = value
+        self.ops = ops
 
 class ValueExpr(Expr):
-    def __init__(self, value: Union[str, Value, Expr, CallExpr], type:int) -> None:
+    def __init__(self, value: Union[str, Value, Expr, CallExpr], type:str) -> None:
         self.value = value
         self.type = type
 
 class Value(Expr):
-    def __init__(self, value: str, type:int) -> None:
+    def __init__(self, value: str, type:str) -> None:
         self.value = value
         self.type = type
 
@@ -83,13 +93,14 @@ class CallExpr(Expr):
 
 # Statements
 class IfStatement(Statement):
-    def __init__(self, thenBr: Program, elseBr: Program = None) -> None:
+    def __init__(self, cond: Expr, thenBr: StatementList = None, elseBr: StatementList = None) -> None:
+        self.cond = cond
         self.thenBr = thenBr
         self.elseBr = elseBr
 
 
 class WhileStatement(Statement):
-    def __init__(self, cond: Expr, loop: Program) -> None:
+    def __init__(self, cond: Expr, loop: StatementList) -> None:
         self.cond = cond
         self.loop = loop
 
@@ -112,7 +123,7 @@ class VarDeclaration(Declaration):
 
 
 class FunctionDeclaration(Declaration):
-    def __init__(self, name: str, argList: list[str] = None, body: Program = None) -> None:
+    def __init__(self, name: str, argList: list[str] = None, body: StatementList = None) -> None:
         self.name = name
         self.argList = argList
         self.body = body
