@@ -12,4 +12,4 @@ a = true
 b = false
 c = -1.2
 str = "asdasd"
-div = 1 + 2.1
+div = 1 / 2

@@ -106,7 +106,7 @@ class Lexer:
 
 
 if __name__ == "__main__":
-    with open("compiler/data/test_lex.txt", "r") as code:
+    with open("compiler/data/test1.txt", "r") as code:
         lexer = Lexer()
         lexer.init(code.read())
         tokens = lexer.tokens()
