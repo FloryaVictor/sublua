@@ -1,4 +1,51 @@
 from typing import Union
+from .IR import *
+
+
+class CodegenError(Exception):
+    def __init(self, msg: str):
+        self.msg = msg
+    
+    def __str__(self) -> str:
+        return self.msg
+
+class FunctionInfo:
+    def __init__(self, name: str, args: list[str], location: int) -> None:
+        self.name = name
+        self.args = args
+        self.location = location
+
+
+class Namespace:
+    def __init__(self) -> None:
+        self.funcs = dict()
+
+
+class CodegenContext:
+    def __init__(self) -> None:
+        self.namespaces = [Namespace()]
+        self.id = 0
+        self.ti = 0
+    
+    def tmpName(self) -> str:
+        name = f"_t{self.ti}"
+        self.ti += 1
+        return name
+    
+
+    def resolveFunc(self, name: str) -> int:
+        for i in reversed(range(len(self.namespaces))):
+            pass
+    
+
+    def create(self):
+        self.namespaces.append(Namespace())
+    
+    def top(self) -> Namespace:
+        return self.namespaces[-1]
+    
+    def drop(self) -> Namespace:
+        return self.namespaces.pop()
 
 
 class Node:
@@ -10,10 +57,11 @@ class Node:
 
     def __str__(self) -> str:
         return ""
-
+    
 
 class Statement(Node):
-    pass
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 class StatementList(Node):
     def __init__(self, statements: list[Statement]) -> None:
@@ -24,6 +72,12 @@ class StatementList(Node):
 
     def __str__(self) -> str:
         return "StatementList"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = []
+        for statement in self.statements:
+            code.extend(statement.codegen(context))
+
 
 class Program(Node):
     def __init__(self, statements: StatementList) -> None:
@@ -34,29 +88,53 @@ class Program(Node):
 
     def __str__(self) -> str:
         return "Program"
+    
+    def codegen(self) -> list[Instruction]:
+        context = CodegenContext()
+        return self.statements.codegen(context)
 
 # Expressions
 class Expr(Node): pass
 
-class OrExpr(Expr): pass
-        
-class AndExpr(Expr): pass
+class OrExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class EqExpr(Expr):  pass
+class AndExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class CmpExpr(Expr): pass
+class EqExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class AddExpr(Expr): pass
+class CmpExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class MulExpr(Expr):pass
+class AddExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class UnaryExpr(Expr):pass
+class MulExpr(Expr):
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class ValueExpr(Expr): pass
+class UnaryExpr(Expr):
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class Value(Expr):pass
+class ValueExpr(Expr): 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-class CallExpr: pass
+class Value(Expr):
+    def codegen(self, context: CodegenContext) -> IRValue:
+        pass
+
+class CallExpr: 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 
 
@@ -69,6 +147,18 @@ class OrExpr(Expr):
     
     def __str__(self) -> str:
         return "OrExpr"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            andExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(andExpr.codegen(context))
+            tmp = BinaryOpValue("or", last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
+
         
 class AndExpr(Expr):
     def __init__(self, exprs: list[EqExpr]) -> None:
@@ -79,6 +169,17 @@ class AndExpr(Expr):
     
     def __str__(self) -> str:
         return "AndExpr"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            eqExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(eqExpr.codegen(context))
+            tmp = BinaryOpValue("and", last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 class EqExpr(Expr):
     def __init__(self, exprs: list[CmpExpr], ops: list[str]) -> None:
@@ -90,6 +191,17 @@ class EqExpr(Expr):
 
     def __str__(self) -> str:
         return f"EqExpr(ops: {self.ops})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            cmpExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(cmpExpr.codegen(context))
+            tmp = BinaryOpValue(self.ops[i - 1], last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 
 class CmpExpr(Expr):
@@ -102,6 +214,17 @@ class CmpExpr(Expr):
 
     def __str__(self) -> str:
         return f"CmpExpr(ops: {self.ops})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            addExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(addExpr.codegen(context))
+            tmp = BinaryOpValue(self.ops[i - 1], last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 
 class AddExpr(Expr):
@@ -114,6 +237,17 @@ class AddExpr(Expr):
 
     def __str__(self) -> str:
         return f"AddExpr(ops: {self.ops})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            mulExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(mulExpr.codegen(context))
+            tmp = BinaryOpValue(self.ops[i - 1], last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 
 class MulExpr(Expr):
@@ -126,6 +260,17 @@ class MulExpr(Expr):
 
     def __str__(self) -> str:
         return f"MulExpr(ops: {self.ops})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = [self.exprs[0].codegen(context)]
+        for i in range(1, len(self.exprs)):
+            unaryExpr = self.exprs[i]
+            last = code[-1]
+            code.extend(unaryExpr.codegen(context))
+            tmp = BinaryOpValue(self.ops[i - 1], last.lhs, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 
 class UnaryExpr(Expr):
@@ -138,6 +283,14 @@ class UnaryExpr(Expr):
 
     def __str__(self) -> str:
         return f"UnaryExpr(ops: {self.ops})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        code = self.value.codegen(context)
+        for op in self.ops:
+            tmp = UnaryOpValue(op, code[-1].lhs)
+            tmp_name = context.tmpName()
+            code.append(AssignmentInstruction(tmp_name, tmp))
+        return code
 
 
 class ValueExpr(Expr):
@@ -154,6 +307,21 @@ class ValueExpr(Expr):
         if self.type != "id":
             return f"ValueExpr({self.type})"
         return f"ValueExpr({self.type}: {self.value})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        if self.type == "id":
+            name = context.tmpName()
+            return [AssignmentInstruction(name, SingleValue(self.value))]
+        elif self.type == "value":
+            name = context.tmpName()
+            return [AssignmentInstruction(name, self.value.codegen(context))]
+        elif self.type == "expr":
+            return self.value.codegen(context)
+        else:
+            callCode = self.value.codegen(context)
+            name = context.tmpName()
+            callCode.append(AssignmentInstruction(name, callCode[-1]))
+            return callCode
 
 
 class Value(Expr):
@@ -163,6 +331,9 @@ class Value(Expr):
 
     def __str__(self) -> str:
         return f"Value({self.type}: {self.value})"
+    
+    def codegen(self, context: CodegenContext) -> IRValue:
+        return SingleValue(self.value)
 
 
 class CallExpr(Expr):
@@ -175,6 +346,15 @@ class CallExpr(Expr):
 
     def __str__(self) -> str:
         return f"CallExpr({self.name})"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        floc = context.resolveFunc(self.name)
+        code = []
+        for arg in self.argList:
+            code.extend(arg.codegen(context))
+            code.append(ParameterInstruction(SingleValue(code[-1].lhs)))   
+        code.append(CallInstruction(self.name, len(self.argList), floc))
+        return code
 
 # Statements
 class IfStatement(Statement):
@@ -188,6 +368,9 @@ class IfStatement(Statement):
 
     def __str__(self) -> str:
         return "IfStatement"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 
 class WhileStatement(Statement):
@@ -200,6 +383,9 @@ class WhileStatement(Statement):
 
     def __str__(self) -> str:
         return "WhileStatement"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 
 class ReturnStatement(Statement):
@@ -211,14 +397,22 @@ class ReturnStatement(Statement):
     
     def __str__(self) -> str:
         return "ReturnStatement"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 
 class BreakStatement(Statement):
-    pass
+    def __str__(self) -> str:
+        return "BreakStatement"
+    
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
-# Declarations
+
 class Declaration(Statement):
-    pass
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 class VarDeclaration(Declaration):
     def __init__(self, name: str, value: Expr) -> None:
@@ -231,6 +425,8 @@ class VarDeclaration(Declaration):
     def __str__(self) -> str:
         return f"VarDeclaration({self.name})"
 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass
 
 class FunctionDeclaration(Declaration):
     def __init__(self, name: str, argList: list[str] = None, body: StatementList = None) -> None:
@@ -244,3 +440,5 @@ class FunctionDeclaration(Declaration):
     def __str__(self) -> str:
         return f"FunctionDeclaration(name: {self.name}, args: {self.argList})"
 
+    def codegen(self, context: CodegenContext) -> list[Instruction]:
+        pass

@@ -62,7 +62,11 @@ class Parser:
             return self.__reutrnStatement()
         elif cur.value == "break":
             return self.__breakStatement()
-        elif cur.value == "function" or cur.tag == "id":
+        elif cur.value == "function":
+            return self.__declaration()
+        elif  cur.tag == "id":
+            if self.tokens[self.pos + 1].value == "(":
+                return self.__callExpr()
             return self.__declaration()
         else:
             raise ParsingError(token=cur)

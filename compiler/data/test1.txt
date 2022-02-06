@@ -6,10 +6,13 @@ function factorial(n)
   else
     return n * factorial(n - 1)
   end
-end 
+end
 
 a = true
 b = false
 c = -1.2
 str = "asdasd"
 div = 1 / 2
+bool = - (not ((4 > 2) * (7 + 2)))
+print(factorial(8))
+k = 1 or 2

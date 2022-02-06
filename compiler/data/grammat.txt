@@ -1,7 +1,7 @@
 program := statementList
 
 statementList := statement* 
-statement := ifStatement | whileStatement | returnStatement | breakStatement | declaration
+statement := ifStatement | whileStatement | returnStatement | breakStatement | declaration | callExpr
 
 expr := orExpr
 orExpr := andExpr ("or" andExpr)*

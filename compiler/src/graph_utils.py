@@ -12,6 +12,8 @@ def dfs(node: Node):
         node.id = id
         id += 1
         for child in node.children():
+            if child is None:
+                continue
             child.parent = node
             dfs_rec(child)
     dfs_rec(node)
@@ -29,6 +31,8 @@ def toGraphviz(node: Node, merge=True) -> graphviz.Digraph:
             node = queue.pop(0)
             graph.node(str(node.id), str(node))
             for child in node.children():
+                if child is None:
+                    continue
                 while (child.__class__ in merge_ops and len(child.ops) == 0) or (child.__class__ in merge_envelope and len(child.children()) == 1):
                     child = child.children()[0]
                 queue.append(child)
@@ -38,6 +42,8 @@ def toGraphviz(node: Node, merge=True) -> graphviz.Digraph:
             node = queue.pop(0)
             graph.node(str(node.id), str(node))
             for child in node.children():
+                if child is None:
+                    continue
                 queue.append(child)
                 graph.edge(str(node.id), str(child.id))
     return graph
