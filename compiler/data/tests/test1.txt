@@ -8,11 +8,11 @@ function factorial(n)
   end
 end
 
-a = true
-b = false
-c = -1.2
-str = "asdasd"
-div = 1 / 2
-bool = - (not ((4 > 2) * (7 + 2)))
-print(factorial(8))
-k = 1 or 2
+i = 0
+a = factorial(i)
+while a < 1000 do
+i = i + 1
+a = factorial(i)
+end
+
+print(a)

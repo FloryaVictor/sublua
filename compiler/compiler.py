@@ -10,7 +10,7 @@ import graphviz
 
 def main():
     lexer = Lexer()
-    code_path = "compiler/data/test1.txt"
+    code_path = "compiler/data/tests/test1.txt"
     code = ""
     with open(code_path, "r") as f:
         code = f.read()
@@ -18,9 +18,12 @@ def main():
  
     parser = Parser(lexer.lex())
     parsed_tree = parser.parse()
-    
-    graph = toGraphviz(parsed_tree, merge=True)
-    graph.render("compiler/output/ast_tree", cleanup=True, format="png")
+    code = parsed_tree.codegen()
+    for instruction in code:
+        print(instruction)
+
+    # graph = toGraphviz(parsed_tree, merge=True)
+    # graph.render("compiler/output/ast_tree", cleanup=True, format="png")
 
 
 if __name__ == "__main__":

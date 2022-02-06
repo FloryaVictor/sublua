@@ -183,7 +183,7 @@ class Parser:
         self.__consume("if")
         cond = self.__expr()
         thenBr = None
-        elseBr = []
+        elseBr = StatementList([])
         self.__consume("then")        
         thenBr = self.__statementList()
         if self.__lookup().value != "end":
