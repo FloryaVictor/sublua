@@ -137,11 +137,16 @@ def remove_blanks(code: list[Instruction]) -> list[Instruction]:
 
     for instruction in code:
         t = type(instruction)
-        
+    
         if t in [GotoInstruction, IfGotoInstruction, CallInstruction] and instruction.target:
             old_id = instruction.target.id
             if old_id in mapping:
                 instruction.target = code[mapping[old_id]]
+        elif t == AssignmentInstruction and type(instruction.rhs) == CallInstruction and instruction.rhs.target:
+            old_id = instruction.rhs.target.id
+            if old_id in mapping:
+                instruction.rhs.target = code[mapping[old_id]]
+
 
     code = list(filter(lambda i: type(i) != BlankInstruction, code))
     

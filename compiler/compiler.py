@@ -1,7 +1,7 @@
 from numpy import source
 from src.lexer import Lexer
 from src.parser import Parser
-from src.graph_utils import toGraphviz
+from src.graph_utils import node2Graphviz, buildCFG, basicBlock2Graphviz
 
 import os
 import sys
@@ -19,11 +19,15 @@ def main():
     parser = Parser(lexer.lex())
     parsed_tree = parser.parse()
     code = parsed_tree.codegen()
+    cfg = buildCFG(code)
+    
+
     for instruction in code:
         print(instruction)
-
-    # graph = toGraphviz(parsed_tree, merge=True)
-    # graph.render("compiler/output/ast_tree", cleanup=True, format="png")
+    
+    graph = basicBlock2Graphviz(cfg)
+   
+    graph.render("compiler/output/cfg", cleanup=True, format="png")
 
 
 if __name__ == "__main__":

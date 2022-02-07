@@ -19,7 +19,7 @@ ifStatement := "if" expr "then" statementList ("else" statementList)? "end"
 
 whileStatement := "while" expr "do" statementList "end"
 
-returnStatement := "return" expr
+returnStatement := "return" expr?
 
 breakStatement := "break"
 

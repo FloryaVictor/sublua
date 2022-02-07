@@ -207,7 +207,10 @@ class Parser:
         self.__consume("return")
         cur = self.__lookup()
         if cur.value in ["+", "-", "not", "(", "nil"] or cur.tag in ["id", "boolean", "number", "string"]:
-            result = self.__expr()
+            if cur.tag != "id": 
+                result = self.__expr()
+            elif cur.tag == "id" and self.tokens[self.pos + 1].value != "=":
+                result = self.__expr()
         return ReturnStatement(result)
 
 

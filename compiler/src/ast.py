@@ -517,6 +517,13 @@ class FunctionDeclaration(Declaration):
         code.append(GotoInstruction(end))
         code.append(start)
         code.extend(body)
-        code.append(ReturnInstruction(SingleValue("nil")))
+        if not body:
+            for ins in reversed(body):
+                t = ins(ins)
+                if t == BlankInstruction:
+                    continue
+                elif t != ReturnInstruction:
+                    code.append(ReturnInstruction(SingleValue("nil")))
+                    break
         code.append(end) 
         return code
