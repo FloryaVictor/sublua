@@ -1,6 +1,9 @@
 from sys import prefix
 from typing import Union
+from typing import List
 from copy import deepcopy
+
+
 
 class IRValue:
     def __init__(self) -> None:
@@ -120,11 +123,11 @@ class BlankInstruction(Instruction):
     def __str__(self) -> str:
         return f"{self.id}: blank"
 
-def enumerate_instructions(code: list[Instruction]) -> None:
+def enumerate_instructions(code: List[Instruction]) -> None:
     for i, instruction in enumerate(code):
         instruction.id = i
 
-def remove_blanks(code: list[Instruction]) -> list[Instruction]:
+def remove_blanks(code: List[Instruction]) -> List[Instruction]:
     mapping = dict()
     code = deepcopy(code)
     for instruction in code:

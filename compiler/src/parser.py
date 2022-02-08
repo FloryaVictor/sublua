@@ -11,7 +11,7 @@ class ParsingError(Exception):
 
 
 class Parser:
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: List[Token]) -> None:
         self.tokens = tokens
         self.tokens.append(Token("EOF", tokens[-1].line, tokens[-1].pos + 1, "EOF"))
         self.pos = 0

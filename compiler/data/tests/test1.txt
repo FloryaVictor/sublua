@@ -6,7 +6,9 @@ function factorial(n)
   else
     return n * factorial(n - 1)
   end
+  
 end
+
 
 
 i = 0
