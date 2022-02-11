@@ -2,6 +2,7 @@ from numpy import source
 from src.lexer import Lexer
 from src.parser import Parser
 from src.graph_utils import node2Graphviz, buildCFG, basicBlock2Graphviz
+from src.bytecode import tac2bytecode
 
 import os
 import sys
@@ -18,16 +19,16 @@ def main():
  
     parser = Parser(lexer.lex())
     parsed_tree = parser.parse()
-    code = parsed_tree.codegen()
-    cfg = buildCFG(code)
+    tac = parsed_tree.codegen()
+    bytecode = tac2bytecode(tac)
     
-
-    for instruction in code:
+    
+    for instruction in bytecode:
         print(instruction)
-    
-    graph = basicBlock2Graphviz(cfg)
+
+    # graph = basicBlock2Graphviz(cfg)
    
-    graph.render("compiler/output/cfg", cleanup=True, format="png")
+    # graph.render("compiler/output/cfg", cleanup=True, format="png")
 
 
 if __name__ == "__main__":

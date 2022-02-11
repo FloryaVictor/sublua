@@ -10,7 +10,6 @@ function factorial(n)
 end
 
 
-
 i = 0
 a = factorial(i)
 while a < 1000 do
@@ -18,4 +17,4 @@ i = i + 1
 a = factorial(i)
 end
 
-print(a)
+print("asdas")
