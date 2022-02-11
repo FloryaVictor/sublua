@@ -8,6 +8,9 @@ class Bytecode:
         self.id = -1
     def __str__(self) -> str:
         pass
+    
+    def to_binary(self) -> bytearray:
+        pass
 
 
 
@@ -17,65 +20,114 @@ class OrOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: OR"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([0])
+
 class AndOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: AND"
+    
+    def to_binary(self) -> bytearray:
+        return bytearray([1])
 
 class EqOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: EQ"
+    
+    def to_binary(self) -> bytearray:
+        return bytearray([2])
 
 class NeqOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: NEQ"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([3])
+
 class LessOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: LESS"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([4])
 
 class LessEqOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: LESSEQ"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([5])
+
 class GreaterOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: GR"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([6])
+
 class GreaterEqOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: GREQ"
+    
+    def to_binary(self) -> bytearray:
+        return bytearray([7])
 
 class AddOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: ADD"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([8])
+
 class SubOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: SUB"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([9])
 
 class MulOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: MUL"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([10])
+
 class DivOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: DIV"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([11])
 
 class DivRemOp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: DIVREM"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([12])
+
+
 class UnaryPlus(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: UPLUSS"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([13])
 
 class UnaryMinus(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: UMINUS"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([14])
+
 class UnaryNot(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: UNOT"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([15])
 
 unOp2cls = {
     "+": UnaryPlus,
@@ -109,6 +161,13 @@ class Pushv(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: PUSHV {self.name}"
 
+    def to_binary(self) -> bytearray:
+        name = str(self.name)
+        size1 = len(name) // 256
+        size2 = len(name) % 256
+        name = bytearray(name, encoding="ASCII")
+        return bytearray([16]) + bytearray([size1, size2]) + name
+
 class Pushl(Bytecode):
     def __init__(self, value) -> None:
         super().__init__()
@@ -117,12 +176,23 @@ class Pushl(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: PUSHL {self.value}"
 
+    def to_binary(self) -> bytearray:
+        value = str(self.value)
+        size1 = len(value) // 256
+        size2 = len(value) % 256
+        value = bytearray(value, encoding="ASCII")
+        return bytearray([17]) + bytearray([size1, size2]) + value
+    
+
 class Pop(Bytecode):
     def __init__(self) -> None:
         super().__init__()
     
     def __str__(self) -> str:
         return f"{self.id}: POP"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([18])
 
 class Load(Bytecode):
     def __init__(self) -> None:
@@ -131,12 +201,18 @@ class Load(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: LOAD"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([19])
+
 class Jmp(Bytecode):
     def __init__(self) -> None:
         super().__init__()
         
     def __str__(self) -> str:
         return f"{self.id}: JMP"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([20])
 
 class CJmp(Bytecode):
     def __init__(self) -> None:
@@ -145,12 +221,18 @@ class CJmp(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: CJMP"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([21])
+
 class Call(Bytecode):
     def __init__(self) -> None:
         super().__init__()
 
     def __str__(self) -> str:
         return f"{self.id}: CALL"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([22])
 
 class Callb(Bytecode):
     def __init__(self) -> None:
@@ -159,6 +241,9 @@ class Callb(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: CALLB"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([23])
+
 class Return(Bytecode):
     def __init__(self) -> None:
         super().__init__()
@@ -166,12 +251,18 @@ class Return(Bytecode):
     def __str__(self) -> str:
         return f"{self.id}: RETURN"
 
+    def to_binary(self) -> bytearray:
+        return bytearray([24])
+
 class Hault(Bytecode):
     def __init__(self) -> None:
         super().__init__()
 
     def __str__(self) -> str:
         return f"{self.id}: HAULT"
+
+    def to_binary(self) -> bytearray:
+        return bytearray([25])
 
 
 def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
@@ -297,3 +388,9 @@ def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
 
     
     return bytecode 
+
+def bytecode2binary(bytecode: List[Bytecode]) -> bytearray:
+    binary = bytearray()
+    for line in bytecode:
+        binary += line.to_binary()
+    return binary

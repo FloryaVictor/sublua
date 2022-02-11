@@ -1,35 +1,31 @@
 from numpy import source
-from src.lexer import Lexer
-from src.parser import Parser
-from src.graph_utils import node2Graphviz, buildCFG, basicBlock2Graphviz
-from src.bytecode import tac2bytecode
+from .src.lexer import Lexer
+from .src.parser import Parser
+from .src.graph_utils import node2Graphviz, buildCFG, basicBlock2Graphviz
+from .src.bytecode import tac2bytecode, bytecode2binary
 
-import os
-import sys
 
-import graphviz
 
-def main():
+def compile(file: str) -> bytearray:
     lexer = Lexer()
-    code_path = "compiler/data/tests/test1.txt"
     code = ""
-    with open(code_path, "r") as f:
+    with open(file, "r") as f:
         code = f.read()
     lexer.init(code)
- 
     parser = Parser(lexer.lex())
-    parsed_tree = parser.parse()
-    tac = parsed_tree.codegen()
+    tree = parser.parse()
+    tac = tree.codegen()
     bytecode = tac2bytecode(tac)
-    
-    
-    for instruction in bytecode:
-        print(instruction)
+    binary = bytecode2binary(bytecode)
+    return binary
 
-    # graph = basicBlock2Graphviz(cfg)
-   
-    # graph.render("compiler/output/cfg", cleanup=True, format="png")
 
+def main():
+    file = "data/tests/test1.txt"
+    result = "output/binary"
+    binary = compile(file)
+    with open(result, "wb") as f:
+        f.write(binary)
 
 if __name__ == "__main__":
     main()
