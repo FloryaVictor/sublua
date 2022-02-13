@@ -254,5 +254,6 @@ class Parser:
                 args.append(self.__next().value)
         self.__consume(")")
         body = self.__statementList()
+        body.statements.append(ReturnStatement(None))
         self.__consume("end")
         return FunctionDeclaration(name, args, body)

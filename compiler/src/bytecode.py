@@ -1,3 +1,4 @@
+from ast import UnaryOp
 from numpy import var
 from .IR import *
 
@@ -128,6 +129,27 @@ class UnaryNot(Bytecode):
 
     def to_binary(self) -> bytearray:
         return bytearray([15])
+
+
+opcode2cls = {
+    0: OrOp, 
+    1: AndOp,
+    2: EqOp,
+    3: NeqOp,
+    4: LessOp,
+    5: LessEqOp,
+    6: GreaterOp,
+    7: GreaterEqOp,
+    8: AddOp,
+    9: SubOp, 
+    10: MulOp,
+    11: DivOp,
+    12: DivRemOp,
+    13: UnaryPlus,
+    14: UnaryMinus,
+    15: UnaryNot
+}
+
 
 unOp2cls = {
     "+": UnaryPlus,
@@ -301,6 +323,7 @@ def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
             bytecode.append(CJmp())
         elif t == AssignmentInstruction:
             var_id = var_ids[ins.lhs]
+            bytecode.append(Pushl(var_id))
             rhs = ins.rhs
             rhst = type(rhs)
             if rhst in [SingleValue, UnaryOpValue]:
@@ -328,6 +351,7 @@ def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
                 bytecode.append(biOp2cls[rhs.op]())
                 
             elif rhst == CallInstruction:
+                bytecode.append(Pushl(1))
                 if rhs.target is None:
                     bytecode.append(Pushl(rhs.name))
                     bytecode.append(Pushl(rhs.argc))
@@ -337,8 +361,7 @@ def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
                     bytecode.append(Pushl(None))
                     toresolve.append((bytecode[-1], target_id))
                     bytecode.append(Pushl(rhs.argc))
-                    bytecode.append(Call())
-            bytecode.append(Pushl(var_id))
+                    bytecode.append(Call())         
             bytecode.append(Load())
         elif t == ReturnInstruction:
             kind = determine(ins.value.value)
@@ -351,24 +374,24 @@ def tac2bytecode(tac: List[Instruction]) -> List[Bytecode]:
                 bytecode.append(Pushl(value))
             bytecode.append(Return())
         elif t == ParameterInstruction:
-            bytecode.append(Pushv(var_ids[ins.value.value]))
             if ins.name is None:
                 bytecode.append(Pushl(-1))
             else:
-                bytecode.append(Pushl(var_ids[ins.value.value]))
+                bytecode.append(Pushl(var_ids[ins.name]))
+            bytecode.append(Pushv(var_ids[ins.value.value]))
         elif t == CallInstruction:
+            bytecode.append(Pushl(0))
             if ins.target is None:
                 bytecode.append(Pushl(ins.name))
                 bytecode.append(Pushl(ins.argc))
                 bytecode.append(Callb())
-                bytecode.append(Pop())
             else:
                 target_id = ins.target.id
                 bytecode.append(Pushl(None))
                 toresolve.append((bytecode[-1], target_id))
                 bytecode.append(Pushl(ins.argc))
                 bytecode.append(Call())
-                bytecode.append(Pop())
+            bytecode.append(Pop())
         elif t == EndInstruction:
             bytecode.append(Hault())
         

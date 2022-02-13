@@ -24,7 +24,7 @@ class Lexer:
             (r'(true|false)', 'boolean'),
             (r'[^\d\W]\w*', 'id'),
             (r'\d*\.\d+|\d+', 'number'),
-            (r'".*"', 'string'),
+            (r'".*?"', 'string'),
             (r'\(', 'lparen'),
             (r'\)', 'rparen'),
             (r',', 'comma'),

@@ -26,6 +26,7 @@ def main():
     binary = compile(file)
     with open(result, "wb") as f:
         f.write(binary)
+   
 
 if __name__ == "__main__":
     main()

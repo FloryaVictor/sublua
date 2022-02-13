@@ -6,7 +6,6 @@ function factorial(n)
   else
     return n * factorial(n - 1)
   end
-  
 end
 
 
@@ -17,4 +16,6 @@ i = i + 1
 a = factorial(i)
 end
 
-print("asdas")
+
+
+print("First factorial greater than 1000 is factorial(" + tostring(i) + ") = " + tostring(a))
